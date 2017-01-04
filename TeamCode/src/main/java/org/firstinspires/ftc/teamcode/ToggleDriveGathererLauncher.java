@@ -10,9 +10,9 @@ import com.qualcomm.robotcore.util.Range;
  * Created by agb on 12/15/2016.
  */
 
-@TeleOp(name = "Toggle arcade/tank with gatherer")
+@TeleOp(name = "Toggle driving with gatherer and launcher")
 
-public class ToggleArcadeTankwGatherer extends OpMode
+public class ToggleDriveGathererLauncher extends OpMode
 {
 
     DcMotor RightFrontDrive;
@@ -20,6 +20,7 @@ public class ToggleArcadeTankwGatherer extends OpMode
     DcMotor RightRearDrive;
     DcMotor LeftRearDrive;
     DcMotor GathererMotor;
+    DcMotor LauncherMotor;
 
     @Override
     public void init() {
@@ -28,6 +29,7 @@ public class ToggleArcadeTankwGatherer extends OpMode
         RightRearDrive = hardwareMap.dcMotor.get("right rear drive");
         LeftRearDrive = hardwareMap.dcMotor.get("left rear drive");
         GathererMotor = hardwareMap.dcMotor.get("gatherer motor");
+        LauncherMotor = hardwareMap.dcMotor.get("launcher motor");
 
         LeftFrontDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         LeftRearDrive.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -116,5 +118,9 @@ public class ToggleArcadeTankwGatherer extends OpMode
         }
 
         GathererMotor.setPower(gathererMotorValue);
+
+        if(gamepad1.right_bumper){LauncherMotor.setPower(1);}
+        else if(gamepad1.left_bumper){LauncherMotor.setPower(-1);}
+        else {LauncherMotor.setPower(0);}
     }
 }
