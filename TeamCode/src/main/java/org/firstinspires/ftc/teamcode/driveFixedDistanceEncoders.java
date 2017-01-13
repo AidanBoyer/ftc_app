@@ -20,7 +20,6 @@ public class driveFixedDistanceEncoders extends LinearOpMode
     DcMotor LeftRearDrive;
     DcMotor GathererMotor;
     DcMotor LauncherMotor;
-    BNO055IMU GyroSensor;
 
     public void moveAllMotors(double power)
     {
@@ -38,6 +37,8 @@ public class driveFixedDistanceEncoders extends LinearOpMode
             sleep(20);
         }
     }
+
+
 
     @Override
     public void runOpMode() throws InterruptedException {

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,7 +12,7 @@ import com.qualcomm.robotcore.util.Range;
  */
 
 @TeleOp(name = "Example Teleop Arcade Mode Exponential")
-
+@Disabled
 public class ExampleTeleopArcadeModeExp extends OpMode {
     DcMotor RightFrontDrive;
     DcMotor LeftFrontDrive;

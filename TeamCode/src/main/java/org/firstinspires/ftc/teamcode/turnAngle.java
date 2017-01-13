@@ -20,6 +20,7 @@ public class turnAngle extends LinearOpMode
     DcMotor LeftRearDrive;
     DcMotor GathererMotor;
     DcMotor LauncherMotor;
+    MasqAdafruitIMU imu;
 
     public void shutOffMotors()
     {
@@ -59,8 +60,6 @@ public class turnAngle extends LinearOpMode
 
     public void turnUsingGyro(int turn)
     {
-        MasqAdafruitIMU imu = new MasqAdafruitIMU("IMU", hardwareMap);
-        //turn *= -1; // positive turns are clockwise
         double roughTolerance = 30;
         double fineTolerance = 0.3;
 
@@ -72,6 +71,42 @@ public class turnAngle extends LinearOpMode
 
         double targetAngle = originalAngle + turn;
         targetAngle = targetAngle % 360;
+        //if (turn<0) {targetAngle = -1*targetAngle;}
+
+        while((Math.abs(angleDifference(-angles[0], targetAngle)) > roughTolerance) && opModeIsActive()){
+            int sign = (int)(angleDifference(-angles[0], targetAngle) / Math.abs(angleDifference(-angles[0], targetAngle)));
+            driveMotors(sign * -roughSpeed, sign * -roughSpeed, sign * roughSpeed, sign * roughSpeed);
+            telemetry.addData("Coarse", imu.telemetrize());
+            telemetry.addData("Angle difference", angleDifference(-angles[0], targetAngle));
+            telemetry.update();
+
+            angles = imu.getAngularOrientation();
+        }
+
+        while(Math.abs(angleDifference(-angles[0], targetAngle)) > fineTolerance && opModeIsActive()){
+            int sign = (int)(angleDifference(-angles[0], targetAngle) / Math.abs(angleDifference(-angles[0], targetAngle)));
+            driveMotors(sign * -fineSpeed, sign * -fineSpeed, sign * fineSpeed, sign * fineSpeed);
+            telemetry.addData("Fine", imu.telemetrize());
+            telemetry.update();
+
+            angles = imu.getAngularOrientation();
+        }
+        shutOffMotors();
+    }
+
+    public void turnToAngle(double targetAngle)
+    {
+        double roughTolerance = 30;
+        double fineTolerance = 0.3;
+
+        double roughSpeed = 0.25;
+        double fineSpeed = 0.10;
+        double[] angles = imu.getAngularOrientation();
+
+        //double originalAngle = -angles[0];
+
+        //double targetAngle = originalAngle + turn;
+        //targetAngle = targetAngle % 360;
         //if (turn<0) {targetAngle = -1*targetAngle;}
 
         while((Math.abs(angleDifference(-angles[0], targetAngle)) > roughTolerance) && opModeIsActive()){
@@ -110,8 +145,26 @@ public class turnAngle extends LinearOpMode
 
         setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        imu = new MasqAdafruitIMU("IMU", hardwareMap);
+
         waitForStart();
 
-        turnUsingGyro(180);
+        turnUsingGyro(90);
+        sleep(1000);
+        turnUsingGyro(90);
+        sleep(1000);
+        turnUsingGyro(90);
+        sleep(1000);
+        turnUsingGyro(90);
+        sleep(1000);
+        turnUsingGyro(90);
+        sleep(1000);
+        turnUsingGyro(90);
+        sleep(1000);
+        turnUsingGyro(90);
+        sleep(1000);
+        turnUsingGyro(90);
+        sleep(1000);
+        turnToAngle(0);
     }
 }

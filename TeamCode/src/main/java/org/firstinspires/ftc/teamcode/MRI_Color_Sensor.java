@@ -65,6 +65,6 @@ public class MRI_Color_Sensor extends OpMode {
         colorSensorCache = colorSensorReader.read(0x04, 1);
 
         //display values
-        telemetry.addData("2 #C", colorSensorCache[0] & 0xFF);
+        telemetry.addData("2 #C", colorSensorCache[0]); // & 0xFF
     }
 }
