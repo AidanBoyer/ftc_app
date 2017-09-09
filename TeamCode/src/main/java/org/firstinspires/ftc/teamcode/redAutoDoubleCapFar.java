@@ -140,6 +140,7 @@ public class redAutoDoubleCapFar extends LinearOpMode
         LauncherMotor.setTargetPosition(LauncherMotor.getCurrentPosition() + ticksPerLauncherRev);
         LauncherMotor.setPower(1);
         while(opModeIsActive() && LauncherMotor.isBusy()) {}
+        LauncherMotor.setPower(0);
         LauncherMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
@@ -159,7 +160,8 @@ public class redAutoDoubleCapFar extends LinearOpMode
 
         driveMotors(runningPower, runningPower, runningPower, runningPower);
 
-        while(opModeIsActive() && RightRearDrive.isBusy() && LeftRearDrive.isBusy()) {}
+        while(opModeIsActive() && RightRearDrive.isBusy() && LeftRearDrive.isBusy() && RightFrontDrive.isBusy() && LeftRearDrive.isBusy()){}
+        shutOffMotors();
         setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
@@ -201,44 +203,44 @@ public class redAutoDoubleCapFar extends LinearOpMode
         colorSensorReader.engage();
         colorSensorReader.write8(3, 1);
 
+
+
         imu = new MasqAdafruitIMU("IMU", hardwareMap);
         ODS = hardwareMap.opticalDistanceSensor.get("Core ODS");
         ultrasonicRangeSensor = hardwareMap.ultrasonicSensor.get("ultrasonic range");
 
-        setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        double inchesBeforePressingBeacon = 5.5;
+        double inchesBeforePressingBeacon = 7;
         int greenColorSensor = 6;
-        double firstInchesFromWall = 17;
-
+        double firstInchesFromWall = 14;
+        telemetry.addData("Red alliance: ", redAlliance);
+        telemetry.update();
         if(MRtouchSensor.isPressed())
         {
             redAlliance = false;
         }
 
-        telemetry.addData("Red alliance: ", redAlliance);
-        telemetry.update();
-
         waitForStart();
 
-        //fireLauncher();
+        setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        fireLauncher();
         sleep(200);
-        runDistanceWEncoders(-1.0, -0.25);
-        sleep(200);
-        GathererMotor.setPower(1);
-        sleep(1000);
-        GathererMotor.setPower(0);
+        runDistanceWEncoders(-1.0, -0.5);
         sleep(200);
         GathererMotor.setPower(1);
         sleep(1000);
         GathererMotor.setPower(0);
         sleep(200);
-        driveMotors(0.25, 0.25, 0.25, 0.25);
+        GathererMotor.setPower(1);
+        sleep(1000);
+        GathererMotor.setPower(0);
+        sleep(200);
+        driveMotors(0.5, 0.5, 0.5, 0.5);
         sleep(1000);
         driveMotors(0, 0, 0, 0);
         sleep(200);
-        //fireLauncher();
-        runDistanceWEncoders(-3.5, -0.5);
+        fireLauncher();
+        runDistanceWEncoders(-3.5, -0.75);
         sleep(500);
         runDistanceWEncoders(0.5, 0.25);
         sleep(200);
@@ -248,14 +250,14 @@ public class redAutoDoubleCapFar extends LinearOpMode
         {
             turnToAngle(290);
             sleep(100);
-            runDistanceWEncoders(2.0, -0.5);
+            runDistanceWEncoders(-2.0, -0.5);
             sleep(200);
             turnToAngle(0);
             sleep(100);
-            runDistanceWEncoders(2.0, -0.5);
+            runDistanceWEncoders(-2.0, -0.5);
             sleep(200);
             turnToAngle(270);
-            sleep(100);
+            sleep(200);
             while(ultrasonicRangeSensor.getUltrasonicLevel() > (firstInchesFromWall * 2.54) &&
                     ultrasonicRangeSensor.getUltrasonicLevel() != 0){
                 driveMotors(-0.5, -0.5, -0.5, -0.5);
@@ -273,10 +275,11 @@ public class redAutoDoubleCapFar extends LinearOpMode
             sleep(100);
             runDistanceWEncoders(-((ultrasonicRangeSensor.getUltrasonicLevel() * 2.54) - (inchesBeforePressingBeacon / 12)), -0.5*(Math.abs(((ultrasonicRangeSensor.getUltrasonicLevel() * 2.54) - (inchesBeforePressingBeacon / 12)))/(((ultrasonicRangeSensor.getUltrasonicLevel() * 2.54) - (inchesBeforePressingBeacon / 12)))));
             pushButton();
-            sleep(5000);
+            sleep(100);
             colorSensorCache = colorSensorReader.read(0x04, 1);
             if(colorSensorCache[0] < greenColorSensor && colorSensorCache[0] != 0)
             {
+                sleep(5000);
                 pushButton();
             }
         }
@@ -285,11 +288,11 @@ public class redAutoDoubleCapFar extends LinearOpMode
         {
             turnToAngle(70);
             sleep(100);
-            runDistanceWEncoders(2.0, -0.5);
+            runDistanceWEncoders(-2.0, -0.5);
             sleep(200);
             turnToAngle(0);
             sleep(100);
-            runDistanceWEncoders(2.0, -0.5);
+            runDistanceWEncoders(-2.0, -0.5);
             sleep(200);
             turnToAngle(90);
             sleep(100);
@@ -310,10 +313,11 @@ public class redAutoDoubleCapFar extends LinearOpMode
             sleep(100);
             runDistanceWEncoders(-((ultrasonicRangeSensor.getUltrasonicLevel() * 2.54) - (inchesBeforePressingBeacon / 12)), -0.5*(Math.abs(((ultrasonicRangeSensor.getUltrasonicLevel() * 2.54) - (inchesBeforePressingBeacon / 12)))/(((ultrasonicRangeSensor.getUltrasonicLevel() * 2.54) - (inchesBeforePressingBeacon / 12)))));
             pushButton();
-            sleep(5000);
+            sleep(100);
             colorSensorCache = colorSensorReader.read(0x04, 1);
             if(colorSensorCache[0] < greenColorSensor && colorSensorCache[0] != 0)
             {
+                sleep(5000);
                 pushButton();
             }
         }
