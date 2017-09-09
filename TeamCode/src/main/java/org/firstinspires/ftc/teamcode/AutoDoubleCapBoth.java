@@ -140,6 +140,7 @@ public class AutoDoubleCapBoth extends LinearOpMode
         LauncherMotor.setTargetPosition(LauncherMotor.getCurrentPosition() + ticksPerLauncherRev);
         LauncherMotor.setPower(1);
         while(opModeIsActive() && LauncherMotor.isBusy()) {}
+        LauncherMotor.setPower(0);
         LauncherMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
@@ -205,13 +206,11 @@ public class AutoDoubleCapBoth extends LinearOpMode
         ODS = hardwareMap.opticalDistanceSensor.get("Core ODS");
         ultrasonicRangeSensor = hardwareMap.ultrasonicSensor.get("ultrasonic range");
 
-        setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
         double inchesBeforePressingBeacon = 5.5;
         int greenColorSensor = 6;
         double inchesBackingAfterFirstBeacon = 2.0;
         double ODSlineThreshold = 0.3;
-        double firstInchesFromWall = 17;
+        double firstInchesFromWall = 14;
         double secondInchesFromWall = 17;
 
         if(MRtouchSensor.isPressed())
@@ -224,7 +223,9 @@ public class AutoDoubleCapBoth extends LinearOpMode
 
         waitForStart();
 
-        //fireLauncher();
+        setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        fireLauncher();
         sleep(200);
         runDistanceWEncoders(-1.0, -0.25);
         sleep(200);
@@ -240,7 +241,7 @@ public class AutoDoubleCapBoth extends LinearOpMode
         sleep(1000);
         driveMotors(0, 0, 0, 0);
         sleep(200);
-        //fireLauncher();
+        fireLauncher();
         runDistanceWEncoders(-3.5, -0.5);
         sleep(500);
         runDistanceWEncoders(0.5, 0.25);
@@ -251,11 +252,11 @@ public class AutoDoubleCapBoth extends LinearOpMode
         {
             turnToAngle(290);
             sleep(100);
-            runDistanceWEncoders(2.0, -0.5);
+            runDistanceWEncoders(-2.0, -0.5);
             sleep(200);
             turnToAngle(0);
             sleep(100);
-            runDistanceWEncoders(2.0, -0.5);
+            runDistanceWEncoders(-2.0, -0.5);
             sleep(200);
             turnToAngle(270);
             sleep(100);
@@ -312,11 +313,11 @@ public class AutoDoubleCapBoth extends LinearOpMode
         {
             turnToAngle(70);
             sleep(100);
-            runDistanceWEncoders(2.0, -0.5);
+            runDistanceWEncoders(-2.0, -0.5);
             sleep(200);
             turnToAngle(0);
             sleep(100);
-            runDistanceWEncoders(2.0, -0.5);
+            runDistanceWEncoders(-2.0, -0.5);
             sleep(200);
             turnToAngle(90);
             sleep(100);

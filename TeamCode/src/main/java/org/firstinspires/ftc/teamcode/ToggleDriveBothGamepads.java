@@ -141,8 +141,8 @@ public class ToggleDriveBothGamepads extends OpMode
 
         GathererMotor.setPower(gathererMotorValue);
 
-        if(gamepad2.right_bumper){LauncherMotor.setPower(1);}
-        else if(gamepad2.left_bumper){LauncherMotor.setPower(-1);}
+        if(gamepad2.y){LauncherMotor.setPower(1);}
+        else if(gamepad2.a){LauncherMotor.setPower(-1);}
         else {LauncherMotor.setPower(0);}
 
         if(gamepad1.left_bumper)
