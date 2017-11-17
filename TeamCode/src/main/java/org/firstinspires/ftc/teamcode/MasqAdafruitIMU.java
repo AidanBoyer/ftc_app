@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.adafruit.BNO055IMU;
+import com.qualcomm.hardware.adafruit.AdafruitBNO055IMU;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcOpModeRegister;
@@ -8,6 +8,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Quaternion;
 
 import java.util.Locale;
+
 
 //import team4997lib.MasqHardware;
 
@@ -19,23 +20,23 @@ import java.util.Locale;
 
 public class MasqAdafruitIMU {
 
-    private final BNO055IMU imu;
+    private final AdafruitBNO055IMU imu;
     private final String name;
 
 
     public MasqAdafruitIMU(String name, HardwareMap hwmap) {
         this.name = name;
-        imu = hwmap.get(BNO055IMU.class, name);
+        imu = hwmap.get(AdafruitBNO055IMU.class, name);
         setParameters();
     }
 
 
     private void setParameters() {
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.mode = BNO055IMU.SensorMode.IMU;
+        AdafruitBNO055IMU.Parameters parameters = new AdafruitBNO055IMU.Parameters();
+        parameters.mode = AdafruitBNO055IMU.SensorMode.IMU;
         parameters.useExternalCrystal = true;
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parameters.pitchMode = BNO055IMU.PitchMode.WINDOWS;
+        parameters.angleUnit = AdafruitBNO055IMU.AngleUnit.DEGREES;
+        parameters.pitchMode = AdafruitBNO055IMU.PitchMode.WINDOWS;
         parameters.loggingEnabled = true;
         parameters.loggingTag = "IMU";
         imu.initialize(parameters);
@@ -47,6 +48,7 @@ public class MasqAdafruitIMU {
      * The equations used in this method came from:
      * https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles#Euler_Angles_from_Quaternion
      */
+
     public double[] getAngles() {
         Quaternion quatAngles = imu.getQuaternionOrientation();
 
