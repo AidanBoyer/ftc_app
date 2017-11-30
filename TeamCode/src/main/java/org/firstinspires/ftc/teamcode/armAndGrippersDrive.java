@@ -1,26 +1,34 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.util.Range;
 
 /**
- * Created by agb on 12/15/2016.
+ * Created by agb on 11/30/2017.
  */
 
-// @TeleOp(name = "Toggle driving with both gamepads")
+@TeleOp(name = "Driving plus arm and grippers")
 
-public class ToggleDriveBothGamepads extends OpMode
+public class armAndGrippersDrive extends OpMode
 {
 
     DcMotor RightFrontDrive;
     DcMotor LeftFrontDrive;
     DcMotor RightRearDrive;
     DcMotor LeftRearDrive;
-    DcMotor GathererMotor;
-    DcMotor LauncherMotor;
+    DcMotor LiftMotor;
+
+    Servo LeftGripperServo;
+    Servo RightGripperServo;
+
+    ServoController ServoController1;
+
 
     @Override
     public void init() {
@@ -28,38 +36,63 @@ public class ToggleDriveBothGamepads extends OpMode
         LeftFrontDrive = hardwareMap.dcMotor.get("left front drive");
         RightRearDrive = hardwareMap.dcMotor.get("right rear drive");
         LeftRearDrive = hardwareMap.dcMotor.get("left rear drive");
-        GathererMotor = hardwareMap.dcMotor.get("gatherer motor");
-        LauncherMotor = hardwareMap.dcMotor.get("launcher motor");
+        LiftMotor = hardwareMap.dcMotor.get("lift motor");
+
+        LeftGripperServo = hardwareMap.servo.get("left gripper");
+        RightGripperServo = hardwareMap.servo.get("right gripper");
+
+        ServoController1 = hardwareMap.servoController.get("servo controller 1");
 
         LeftFrontDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         LeftRearDrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        GathererMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        ServoController1.pwmDisable();
+
     }
+
+    double leftGripperStartingPosition;
+    double rightGripperStartingPosition;
+    double leftGripperHoldingOffsetFromHalf = 0.030; // smaller number is closed tighter
+    double rightGripperHoldingOffsetFromHalf = 0.001; // larger number is closed tighter
+    double leftGripperOpenedPosition;
+    double rightGripperOpenedPosition;
+
+    double squeezingDownsizeCoefficient = 200;
 
     boolean arcadeDriveStyle = false;
     boolean driveStyleWasPressed = false;
     boolean driveReversed = false;
     boolean wasReverseButton = false;
+    boolean absoluteServoControl = false;
+    boolean guideWasPressed = false;
 
+    double rightFrontDriveValue = 0;
+    double rightRearDriveValue = 0;
+    double leftFrontDriveValue = 0;
+    double leftRearDriveValue = 0;
+    double liftMotorValue = 0;
+    double rightGripperPosition = 0.5 + rightGripperHoldingOffsetFromHalf;
+    double leftGripperPosition = 0.5 + leftGripperHoldingOffsetFromHalf;
 
     @Override
     public void loop()
     {
-        double rightFrontDriveValue = 0;
-        double rightRearDriveValue = 0;
-        double leftFrontDriveValue = 0;
-        double leftRearDriveValue = 0;
+        rightFrontDriveValue = 0;
+        rightRearDriveValue = 0;
+        leftFrontDriveValue = 0;
+        leftRearDriveValue = 0;
+        liftMotorValue = 0;
 
-        if(gamepad1.start && gamepad1.back)
+        if(gamepad1.guide)
         {
-            if(!driveStyleWasPressed) // if the buttons weren't pressed last time
+            if(!driveStyleWasPressed) // if the button wasn't pressed last time
             {
                 if (arcadeDriveStyle) {arcadeDriveStyle = false;} // if arcadeDriveStyle is true, make it false
                 else if (!arcadeDriveStyle) {arcadeDriveStyle = true;} // if arcadeDriveStyle is false, make it true
                 driveStyleWasPressed = true;
             }
         }
-        else // if the buttons aren't pressed
+        else // if the button isn't pressed
         {
             driveStyleWasPressed = false;
         }
@@ -130,20 +163,6 @@ public class ToggleDriveBothGamepads extends OpMode
             leftFrontDriveValue = -gamepad1.left_trigger;
             leftRearDriveValue = -gamepad1.left_trigger;
         }
-        double gathererMotorValue = 0;
-
-        if (gamepad2.right_trigger != 0){
-            gathererMotorValue = gamepad2.right_trigger;
-        }
-        else if(gamepad2.left_trigger != 0) {
-            gathererMotorValue = -gamepad2.left_trigger;
-        }
-
-        GathererMotor.setPower(gathererMotorValue);
-
-        if(gamepad2.y){LauncherMotor.setPower(1);}
-        else if(gamepad2.a){LauncherMotor.setPower(-1);}
-        else {LauncherMotor.setPower(0);}
 
         if(gamepad1.left_bumper)
         {
@@ -180,10 +199,47 @@ public class ToggleDriveBothGamepads extends OpMode
             rightFrontDriveValue = LF * -1;
         }
 
+        if(gamepad2.guide)
+        {
+            if(!guideWasPressed) // if the button wasn't pressed last time
+            {
+                if (absoluteServoControl) {absoluteServoControl = false;} // if absoluteServoControl is true, make it false
+                else if (!absoluteServoControl) {absoluteServoControl = true;} // if absoluteServoControl is false, make it true
+                guideWasPressed = true;
+            }
+        }
+        else {guideWasPressed = false;}
+
+        if(absoluteServoControl)
+        {
+            rightGripperPosition = (((((gamepad2.right_stick_x * gamepad2.right_stick_x * Math.signum(gamepad2.right_stick_x)) * -1) + 1) / 2) + rightGripperHoldingOffsetFromHalf);
+            leftGripperPosition = (((((gamepad2.left_stick_x * gamepad2.left_stick_x * Math.signum(gamepad2.left_stick_x)) * -1) + 1) / 2) + leftGripperHoldingOffsetFromHalf);
+
+            liftMotorValue = ((gamepad2.right_trigger * gamepad2.right_trigger) - (gamepad2.left_trigger * gamepad2.left_trigger));
+        }
+        else
+        {
+            if(gamepad2.right_stick_y < 0){liftMotorValue = gamepad2.right_stick_y * gamepad2.right_stick_y;}
+            else{liftMotorValue = gamepad2.right_stick_y * gamepad2.right_stick_y * -1;}
+
+            leftGripperPosition = leftGripperPosition - (gamepad2.right_trigger / squeezingDownsizeCoefficient) + (gamepad2.left_trigger / squeezingDownsizeCoefficient);
+            rightGripperPosition = rightGripperPosition + (gamepad2.right_trigger / squeezingDownsizeCoefficient) - (gamepad2.left_trigger / squeezingDownsizeCoefficient);
+        }
+
+        if(gamepad2.a)
+        {
+            rightGripperPosition = 0.5 + rightGripperHoldingOffsetFromHalf;
+            leftGripperPosition = 0.5 + leftGripperHoldingOffsetFromHalf;
+        }
+
         RightFrontDrive.setPower(rightFrontDriveValue);
         RightRearDrive.setPower(rightRearDriveValue);
         LeftFrontDrive.setPower(leftFrontDriveValue);
         LeftRearDrive.setPower(leftRearDriveValue);
 
+        LiftMotor.setPower(liftMotorValue);
+
+        RightGripperServo.setPosition(rightGripperPosition);
+        LeftGripperServo.setPosition(leftGripperPosition);
     }
 }

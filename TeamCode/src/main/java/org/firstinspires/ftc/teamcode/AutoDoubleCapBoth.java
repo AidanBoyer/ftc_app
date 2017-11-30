@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.hardware.UltrasonicSensor;
  * Created by agb on 1/13/2017.
  */
 
-@Autonomous(name = "Norm start, both balls, cap, both beacons")
+// @Autonomous(name = "Norm start, both balls, cap, both beacons")
 
 public class AutoDoubleCapBoth extends LinearOpMode
 {

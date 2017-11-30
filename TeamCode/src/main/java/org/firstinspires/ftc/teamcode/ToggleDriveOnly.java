@@ -7,20 +7,18 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
 
 /**
- * Created by agb on 12/15/2016.
+ * Created by agb on 11/24/2017.
  */
 
-// @TeleOp(name = "Toggle driving with both gamepads")
+@TeleOp(name = "Toggle driving only")
 
-public class ToggleDriveBothGamepads extends OpMode
+public class ToggleDriveOnly extends OpMode
 {
 
     DcMotor RightFrontDrive;
     DcMotor LeftFrontDrive;
     DcMotor RightRearDrive;
     DcMotor LeftRearDrive;
-    DcMotor GathererMotor;
-    DcMotor LauncherMotor;
 
     @Override
     public void init() {
@@ -28,12 +26,9 @@ public class ToggleDriveBothGamepads extends OpMode
         LeftFrontDrive = hardwareMap.dcMotor.get("left front drive");
         RightRearDrive = hardwareMap.dcMotor.get("right rear drive");
         LeftRearDrive = hardwareMap.dcMotor.get("left rear drive");
-        GathererMotor = hardwareMap.dcMotor.get("gatherer motor");
-        LauncherMotor = hardwareMap.dcMotor.get("launcher motor");
 
         LeftFrontDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         LeftRearDrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        GathererMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     boolean arcadeDriveStyle = false;
@@ -130,20 +125,6 @@ public class ToggleDriveBothGamepads extends OpMode
             leftFrontDriveValue = -gamepad1.left_trigger;
             leftRearDriveValue = -gamepad1.left_trigger;
         }
-        double gathererMotorValue = 0;
-
-        if (gamepad2.right_trigger != 0){
-            gathererMotorValue = gamepad2.right_trigger;
-        }
-        else if(gamepad2.left_trigger != 0) {
-            gathererMotorValue = -gamepad2.left_trigger;
-        }
-
-        GathererMotor.setPower(gathererMotorValue);
-
-        if(gamepad2.y){LauncherMotor.setPower(1);}
-        else if(gamepad2.a){LauncherMotor.setPower(-1);}
-        else {LauncherMotor.setPower(0);}
 
         if(gamepad1.left_bumper)
         {
@@ -184,6 +165,5 @@ public class ToggleDriveBothGamepads extends OpMode
         RightRearDrive.setPower(rightRearDriveValue);
         LeftFrontDrive.setPower(leftFrontDriveValue);
         LeftRearDrive.setPower(leftRearDriveValue);
-
     }
 }

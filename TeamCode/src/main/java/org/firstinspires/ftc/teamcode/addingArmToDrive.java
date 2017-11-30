@@ -4,23 +4,30 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.util.Range;
 
 /**
- * Created by agb on 12/15/2016.
+ * Created by agb on 11/27/2017.
  */
 
-// @TeleOp(name = "Toggle driving with both gamepads")
+@TeleOp(name = "Driving plus arm movement")
 
-public class ToggleDriveBothGamepads extends OpMode
+public class addingArmToDrive extends OpMode
 {
 
     DcMotor RightFrontDrive;
     DcMotor LeftFrontDrive;
     DcMotor RightRearDrive;
     DcMotor LeftRearDrive;
-    DcMotor GathererMotor;
-    DcMotor LauncherMotor;
+    DcMotor LiftMotor;
+
+    Servo LeftGripperServo;
+    Servo RightGripperServo;
+
+    ServoController ServoController1;
+
 
     @Override
     public void init() {
@@ -28,27 +35,43 @@ public class ToggleDriveBothGamepads extends OpMode
         LeftFrontDrive = hardwareMap.dcMotor.get("left front drive");
         RightRearDrive = hardwareMap.dcMotor.get("right rear drive");
         LeftRearDrive = hardwareMap.dcMotor.get("left rear drive");
-        GathererMotor = hardwareMap.dcMotor.get("gatherer motor");
-        LauncherMotor = hardwareMap.dcMotor.get("launcher motor");
+        LiftMotor = hardwareMap.dcMotor.get("lift motor");
+
+        LeftGripperServo = hardwareMap.servo.get("left gripper");
+        RightGripperServo = hardwareMap.servo.get("right gripper");
+
+        ServoController1 = hardwareMap.servoController.get("servo controller 1");
 
         LeftFrontDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         LeftRearDrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        GathererMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
+
+    double leftGripperStartingPosition;
+    double rightGripperStartingPosition;
+    double leftGripperHoldingPosition;
+    double rightGripperHoldingPosition;
+    double leftGripperOpenedPosition;
+    double rightGripperOpenedPosition;
 
     boolean arcadeDriveStyle = false;
     boolean driveStyleWasPressed = false;
     boolean driveReversed = false;
     boolean wasReverseButton = false;
 
+    double rightFrontDriveValue = 0;
+    double rightRearDriveValue = 0;
+    double leftFrontDriveValue = 0;
+    double leftRearDriveValue = 0;
+    double liftMotorValue = 0;
 
     @Override
     public void loop()
     {
-        double rightFrontDriveValue = 0;
-        double rightRearDriveValue = 0;
-        double leftFrontDriveValue = 0;
-        double leftRearDriveValue = 0;
+        rightFrontDriveValue = 0;
+        rightRearDriveValue = 0;
+        leftFrontDriveValue = 0;
+        leftRearDriveValue = 0;
+        liftMotorValue = 0;
 
         if(gamepad1.start && gamepad1.back)
         {
@@ -130,20 +153,6 @@ public class ToggleDriveBothGamepads extends OpMode
             leftFrontDriveValue = -gamepad1.left_trigger;
             leftRearDriveValue = -gamepad1.left_trigger;
         }
-        double gathererMotorValue = 0;
-
-        if (gamepad2.right_trigger != 0){
-            gathererMotorValue = gamepad2.right_trigger;
-        }
-        else if(gamepad2.left_trigger != 0) {
-            gathererMotorValue = -gamepad2.left_trigger;
-        }
-
-        GathererMotor.setPower(gathererMotorValue);
-
-        if(gamepad2.y){LauncherMotor.setPower(1);}
-        else if(gamepad2.a){LauncherMotor.setPower(-1);}
-        else {LauncherMotor.setPower(0);}
 
         if(gamepad1.left_bumper)
         {
@@ -180,10 +189,14 @@ public class ToggleDriveBothGamepads extends OpMode
             rightFrontDriveValue = LF * -1;
         }
 
+        if(gamepad2.left_trigger != 0) {liftMotorValue = -gamepad2.left_trigger;}
+
+        if(gamepad2.right_trigger != 0) {liftMotorValue = gamepad2.right_trigger;}
+
         RightFrontDrive.setPower(rightFrontDriveValue);
         RightRearDrive.setPower(rightRearDriveValue);
         LeftFrontDrive.setPower(leftFrontDriveValue);
         LeftRearDrive.setPower(leftRearDriveValue);
-
+        LiftMotor.setPower(liftMotorValue);
     }
 }
