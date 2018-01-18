@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,7 +15,8 @@ import com.qualcomm.robotcore.util.Range;
  * Created by agb on 11/30/2017.
  */
 
-@TeleOp(name = "Driving plus arm and grippers")
+@TeleOp(name = "armAndGrippersDrive")
+@Disabled
 
 public class armAndGrippersDrive extends OpMode
 {
@@ -29,6 +32,7 @@ public class armAndGrippersDrive extends OpMode
 
     ServoController ServoController1;
 
+    TouchSensor armSafetyStop;
 
     @Override
     public void init() {
@@ -42,6 +46,8 @@ public class armAndGrippersDrive extends OpMode
         RightGripperServo = hardwareMap.servo.get("right gripper");
 
         ServoController1 = hardwareMap.servoController.get("servo controller 1");
+
+        armSafetyStop = hardwareMap.touchSensor.get("arm safety stop");
 
         LeftFrontDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         LeftRearDrive.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -230,6 +236,11 @@ public class armAndGrippersDrive extends OpMode
         {
             rightGripperPosition = 0.5 + rightGripperHoldingOffsetFromHalf;
             leftGripperPosition = 0.5 + leftGripperHoldingOffsetFromHalf;
+        }
+
+        if(armSafetyStop.isPressed() && (Math.signum(liftMotorValue) == 1))
+        {
+            liftMotorValue = 0;
         }
 
         RightFrontDrive.setPower(rightFrontDriveValue);

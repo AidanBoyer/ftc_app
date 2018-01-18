@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.util.Range;
  * Created by agb on 11/24/2017.
  */
 
-@TeleOp(name = "Toggle driving only")
+//@TeleOp(name = "Toggle driving only")
 
 public class ToggleDriveOnly extends OpMode
 {

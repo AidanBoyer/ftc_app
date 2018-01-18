@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cCompassSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,14 +10,27 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
+import org.firstinspires.ftc.robotcore.external.navigation.VuMarkInstanceId;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+
 /**
- * Created by agb on 1/9/2018.
+ * Created by agb on 1/17/2018.
  */
 
-@Autonomous(name = "block, jewel, center")
-@Disabled
+@Autonomous(name = "blue, side, angle")
 
-public class blockInCenterTest extends LinearOpMode
+public class blueSideAngle extends LinearOpMode
 {
     TouchSensor teamSelector;
     DcMotor RightFrontDrive;
@@ -38,6 +50,7 @@ public class blockInCenterTest extends LinearOpMode
     ModernRoboticsI2cCompassSensor compassSensor;
 
     MasqAdafruitIMU imu;
+    VuforiaLocalizer vuforia;
 
     public void driveMotors(double rightFront, double rightRear, double leftFront, double leftRear)
     {
@@ -47,12 +60,30 @@ public class blockInCenterTest extends LinearOpMode
         LeftRearDrive.setPower(leftRear);
     }
 
+    public void moveAllMotors(double power)
+    {
+        RightFrontDrive.setPower(power);
+        RightRearDrive.setPower(power);
+        LeftFrontDrive.setPower(power);
+        LeftRearDrive.setPower(power);
+    }
+
+    public void accelerateGradually(int increments, int targetPower)
+    {
+        int multiplier = targetPower / increments;
+        for(int i = 1; i <= increments; i++)
+        {
+            moveAllMotors((i * multiplier) / 100);
+            sleep(20);
+        }
+    }
+
     public void driveRightMotors(double rightFront, double rightRear, double leftFront, double leftRear)
     {
         RightFrontDrive.setPower(rightFront);
         RightRearDrive.setPower(rightRear);
-        LeftFrontDrive.setPower(leftFront);
-        LeftRearDrive.setPower(leftRear);
+        //LeftFrontDrive.setPower(leftFront);
+        //LeftRearDrive.setPower(leftRear);
     }
 
     public void shutOffMotors()
@@ -139,9 +170,8 @@ public class blockInCenterTest extends LinearOpMode
         shutOffMotors();
     }
 
-    public void turnToAngle(double targetAngle, double roughSpeed, double fineSpeed, double fineTolerance)
+    public void turnToAngle(double targetAngle, double roughSpeed, double roughTolerance, double fineSpeed, double fineTolerance)
     {
-        double roughTolerance = 30;
 
         double[] angles = imu.getAngularOrientation();
 
@@ -151,8 +181,8 @@ public class blockInCenterTest extends LinearOpMode
         //targetAngle = targetAngle % 360;
         //if (turn<0) {targetAngle = -1*targetAngle;}
 
-        while((Math.abs(angleDifference(-angles[0], targetAngle)) > roughTolerance) && opModeIsActive()){
-            int sign = (int)(angleDifference(-angles[0], targetAngle) / Math.abs(angleDifference(-angles[0], targetAngle)));
+        while((Math.abs(angleDifference(-angles[0], targetAngle)) > roughTolerance) && opModeIsActive()) {
+            int sign = (int) (angleDifference(-angles[0], targetAngle) / Math.abs(angleDifference(-angles[0], targetAngle)));
             driveMotors(sign * -roughSpeed, sign * -roughSpeed, sign * roughSpeed, sign * roughSpeed);
             telemetry.addData("Coarse", imu.telemetrize());
             telemetry.addData("Angle difference", angleDifference(-angles[0], targetAngle));
@@ -160,6 +190,14 @@ public class blockInCenterTest extends LinearOpMode
 
             angles = imu.getAngularOrientation();
         }
+        double angle0 = 0;
+        for (int ii = 0; ii < 10; ii++)
+        {
+            angles = imu.getAngularOrientation();
+            angle0 = angle0 + angles[0];
+        }
+        angle0 = angle0 / 10;
+
 
         while(Math.abs(angleDifference(-angles[0], targetAngle)) > fineTolerance && opModeIsActive()){
             int sign = (int)(angleDifference(-angles[0], targetAngle) / Math.abs(angleDifference(-angles[0], targetAngle)));
@@ -167,7 +205,12 @@ public class blockInCenterTest extends LinearOpMode
             telemetry.addData("Fine", imu.telemetrize());
             telemetry.update();
 
-            angles = imu.getAngularOrientation();
+            for (int ii = 0; ii < 10; ii++)
+            {
+                angles = imu.getAngularOrientation();
+                angle0 = angle0 + angles[0];
+            }
+            angle0 = angle0 / 10;
         }
         shutOffMotors();
     }
@@ -205,7 +248,7 @@ public class blockInCenterTest extends LinearOpMode
         shutOffMotors();
     }
 
-    public void runDistanceWEncoders(double feet, double runningPower)
+    public void runDistanceWEncoders(double feet, double runningPower, boolean shutoffWhenDone)
     {
         double inchesToTravel = feet * 12;
         double wheelDiameter = 3.75;
@@ -222,7 +265,7 @@ public class blockInCenterTest extends LinearOpMode
         driveMotors(runningPower, runningPower, runningPower, runningPower);
 
         while(opModeIsActive() && RightRearDrive.isBusy() && LeftRearDrive.isBusy() && RightFrontDrive.isBusy() && LeftRearDrive.isBusy()){}
-        shutOffMotors();
+        if(shutoffWhenDone){shutOffMotors();}
         setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
@@ -235,6 +278,8 @@ public class blockInCenterTest extends LinearOpMode
         double jewelArmServoRestPosition = 0.19;
         double jewelArmServoDownPosition = 0.865;
         double gripperHoldingSqueeze = 0.035;
+
+        double cypherSpecificDriveDistance = 2.5; // initialize to make program happy, hope this value never matters
 
         boolean redAlliance = true;
         teamSelector = hardwareMap.touchSensor.get("team selector button");
@@ -273,9 +318,37 @@ public class blockInCenterTest extends LinearOpMode
 
         JewelColorSensor.enableLed(true);
 
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+        parameters.vuforiaLicenseKey = "AQvbmU7/////AAAAGb+OYMKGPUZOr+k1NC6Kbih5aUKWLiVHtSwp8Gcl1zv/u0DD5aiq75Z2T/KzneDb+SkazMqa5EohmpUcSzjRKUIDnftPjJpaU/6uxtr2g/Tr/WYSi+x8sr4odiVJMmlYlPlpTHSL1SPs1s0+s2DfAEP4J9Qdzix4y6+CLDnNR5yKN2j+7YfzRpJNRBfItD2GhU6G6tq3Dkv7xZcOwlyqlxqAOZ3+MU4fB1Hgit/ivliXdnm1nhWo38y8orWR2vzRDWdfIlu9ERn9zy0UnVmQJbPKs4euZU3zanE9UnxREnqFy3rpuV5xxhgj1LgDzfF9C+YwWjXYB6rXtADfdg76hZnKC1FUX3P8oWxrQRFqtojK";
+
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+
+        VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+        VuforiaTrackable relicTemplate = relicTrackables.get(0);
+        relicTemplate.setName("relicVuMarkTemplate"); // can help in debugging; otherwise not necessary
+
+        telemetry.update();
+        int vuMarkIterations = 0;
+
+        waitForStart(); // ________________________________________
+
+        relicTrackables.activate();
+
+        RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
+
+        while(vuMark == RelicRecoveryVuMark.UNKNOWN)
+        {
+            vuMark = RelicRecoveryVuMark.from(relicTemplate);
+            vuMarkIterations = vuMarkIterations + 1;
+        }
+
+        telemetry.addData("Iterations:", vuMarkIterations);
         telemetry.update();
 
-        waitForStart();
+        if(vuMark == RelicRecoveryVuMark.CENTER) {cypherSpecificDriveDistance = 1.5;}
+        if(vuMark == RelicRecoveryVuMark.LEFT) {cypherSpecificDriveDistance = 1.0;}
+        if(vuMark == RelicRecoveryVuMark.RIGHT) {cypherSpecificDriveDistance = 0.75;}
 
         JewelArmServo.setPosition(jewelArmServoRestPosition);
 
@@ -293,7 +366,9 @@ public class blockInCenterTest extends LinearOpMode
         LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         LiftMotor.setPower(1);
 
-        //while(opModeIsActive() && LiftMotor.isBusy()) {}
+        runDistanceWEncoders(0.085, 0.1, true);
+
+        sleep(200);
 
         JewelArmServo.setPosition(jewelArmServoDownPosition);
         sleep(500);
@@ -301,31 +376,53 @@ public class blockInCenterTest extends LinearOpMode
         {
             if(JewelColorSensor.red() > JewelColorSensor.blue())
             {
-                turnUsingGyroRightOnly(10, 0.25, 0.09, 0.3); // turn right
+                turnUsingGyroRightOnly(12, 0.25, 0.09, 0.3); // turn right
             }
             else
             {
-                turnUsingGyroRightOnly(-10, 0.25, 0.09, 0.3); // turn left
+                turnUsingGyroRightOnly(-12, 0.25, 0.09, 0.3); // turn left
             }
         }
         else // if blue alliance
         {
             if(JewelColorSensor.red() > JewelColorSensor.blue())
             {
-                turnUsingGyroRightOnly(-10, 0.25, 0.09, 0.3); // turn left
+                turnUsingGyroRightOnly(-12, 0.25, 0.09, 0.3); // turn left
             }
             else
             {
-                turnUsingGyroRightOnly(10, 0.25, 0.09, 0.3); // turn right
+                turnUsingGyroRightOnly(12, 0.25, 0.09, 0.3); // turn right
             }
         }
         sleep(500);
         JewelArmServo.setPosition(jewelArmServoRestPosition);
         turnToAngleRightOnly(0, 0.25, 0.08, 0.2);
         sleep(500);
-        runDistanceWEncoders(2.5, 0.30);
-        sleep(500);
-        turnToAngle(-90,0.25, 0.09, 0.2);
+        runDistanceWEncoders(1.78, 0.30, true);
+        sleep(300);
+        driveMotors(-0.15, -0.15, -0.15, -0.15);
+        sleep(1000);
+        shutOffMotors();
+        runDistanceWEncoders(cypherSpecificDriveDistance, 0.35, true);
+        sleep(300);
+        switch (vuMark)
+        {
+            case LEFT:
+                turnToAngle(-120,0.30, 18,0.06, 0.2);
+                sleep(200);
+                turnToAngle(-120,0.30, 18,0.06, 0.2);
+                break;
+            case CENTER:
+                turnToAngle(-120,0.30, 18,0.06, 0.2);
+                sleep(200);
+                turnToAngle(-120,0.30, 18,0.06, 0.2);
+                break;
+            case RIGHT:
+                turnToAngle(-60,0.30, 18,0.06, 0.2);
+                sleep(200);
+                turnToAngle(-60,0.30, 18,0.06, 0.2);
+                break;
+        }
 
         LiftMotor.setTargetPosition(0);
         LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -336,20 +433,21 @@ public class blockInCenterTest extends LinearOpMode
         LeftGripperServo.setPosition(0.75);
         RightGripperServo.setPosition(0.25);
 
-        sleep(200);
+        runDistanceWEncoders(-0.1, -0.15, true);
 
         LiftMotor.setTargetPosition(800);
         LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         LiftMotor.setPower(1);
 
+        sleep(300);
+
         LeftGripperServo.setPosition(1);
         RightGripperServo.setPosition(0);
 
-        runDistanceWEncoders(-0.1, -0.15);
-        runDistanceWEncoders(0.1, 0.15);
-
+        accelerateGradually(25, 30);
         driveMotors(0.3, 0.3, 0.3, 0.3);
-        sleep(1500);
+        sleep(1800);
         shutOffMotors();
+        runDistanceWEncoders(-0.2, -0.2, true);
     }
 }

@@ -17,6 +17,7 @@ public class ServoPositionFinder extends OpMode
 
     Servo LeftGripperServo;
     Servo RightGripperServo;
+    Servo JewelArmServo;
 
     ServoController ServoController1;
 
@@ -26,34 +27,38 @@ public class ServoPositionFinder extends OpMode
         LeftGripperServo = hardwareMap.servo.get("left gripper");
         RightGripperServo = hardwareMap.servo.get("right gripper");
         ServoController1 = hardwareMap.servoController.get("servo controller 1");
+        JewelArmServo = hardwareMap.servo.get("jewel arm");
     }
 
     double leftServoPosition = 0.5;
     double rightServoPosition = 0.5;
+    double jewelArmServoPosition = 0.232;
     double downsizingCoefficient = 100;
     boolean isRight = false;
 
     @Override
     public void loop()
     {
-        if(gamepad1.right_bumper) {isRight = true;}
-        else if(gamepad1.left_bumper) {isRight = false;}
+        //if(gamepad1.right_bumper) {isRight = true;}
+        //else if(gamepad1.left_bumper) {isRight = false;}
 
-        if(isRight)
-        {
-            rightServoPosition = rightServoPosition + (gamepad1.right_trigger / downsizingCoefficient) - (gamepad1.left_trigger / downsizingCoefficient);
-        }
-        else
-        {
-            leftServoPosition = leftServoPosition + (gamepad1.right_trigger / downsizingCoefficient) - (gamepad1.left_trigger / downsizingCoefficient);
-        }
+        //if(isRight)
+        //{
+            //rightServoPosition = rightServoPosition + (gamepad1.right_trigger / downsizingCoefficient) - (gamepad1.left_trigger / downsizingCoefficient);
+        //}
+        //else
+        //{
+        //    leftServoPosition = leftServoPosition + (gamepad1.right_trigger / downsizingCoefficient) - (gamepad1.left_trigger / downsizingCoefficient);
+        //}
 
         LeftGripperServo.setPosition(leftServoPosition);
         RightGripperServo.setPosition(rightServoPosition);
 
-        telemetry.addData("Left", LeftGripperServo.getPosition());
-        telemetry.addData("Right", RightGripperServo.getPosition());
-        telemetry.addData("Value", Math.signum(-42.9));
+        jewelArmServoPosition = jewelArmServoPosition + (gamepad1.right_trigger / downsizingCoefficient) - (gamepad1.left_trigger / downsizingCoefficient);
+        JewelArmServo.setPosition(jewelArmServoPosition);
+        //telemetry.addData("Left", LeftGripperServo.getPosition());
+        //telemetry.addData("Right", RightGripperServo.getPosition());
+        telemetry.addData("Arm", JewelArmServo.getPosition());
         telemetry.update();
     }
 }

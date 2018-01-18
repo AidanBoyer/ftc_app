@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
  */
 //@TeleOp(name="Template: Linear OpMode", group="Linear Opmode")
 
-@TeleOp(name="legacy drive test - exp")
+//@TeleOp(name="legacy drive test - exp")
 public class legacyDriveTest1 extends OpMode
 {
     private MatrixDcMotorController matrixMotorController1 = null;
