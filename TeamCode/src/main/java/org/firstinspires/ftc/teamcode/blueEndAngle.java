@@ -28,9 +28,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
  * Created by agb on 1/18/2018.
  */
 
-@Autonomous(name = "Side, 30°", group = "Autonomous")
+@Autonomous(name = "End, angle", group = "Autonomous")
 
-public class SideAngle extends LinearOpMode
+public class blueEndAngle extends LinearOpMode
 {
     TouchSensor teamSelector;
     DcMotor RightFrontDrive;
@@ -86,6 +86,14 @@ public class SideAngle extends LinearOpMode
         //LeftRearDrive.setPower(leftRear);
     }
 
+    public void driveLeftMotors(double rightFront, double rightRear, double leftFront, double leftRear)
+    {
+        //RightFrontDrive.setPower(rightFront);
+        //RightRearDrive.setPower(rightRear);
+        LeftFrontDrive.setPower(leftFront);
+        LeftRearDrive.setPower(leftRear);
+    }
+
     public void shutOffMotors()
     {
         driveMotors(0, 0, 0, 0);
@@ -138,6 +146,39 @@ public class SideAngle extends LinearOpMode
     }
 
     public void turnUsingGyroRightOnly(int turn, double roughSpeed, double fineSpeed, double fineTolerance)
+{
+    double roughTolerance = 30;
+
+    double[] angles = imu.getAngularOrientation();
+
+    double originalAngle = -angles[0];
+
+    double targetAngle = originalAngle + turn;
+    targetAngle = targetAngle % 360;
+    //if (turn<0) {targetAngle = -1*targetAngle;}
+
+    while((Math.abs(angleDifference(-angles[0], targetAngle)) > roughTolerance) && opModeIsActive()){
+        int sign = (int)(angleDifference(-angles[0], targetAngle) / Math.abs(angleDifference(-angles[0], targetAngle)));
+        driveRightMotors(sign * -roughSpeed, sign * -roughSpeed, sign * roughSpeed, sign * roughSpeed);
+        telemetry.addData("Coarse", imu.telemetrize());
+        telemetry.addData("Angle difference", angleDifference(-angles[0], targetAngle));
+        telemetry.update();
+
+        angles = imu.getAngularOrientation();
+    }
+
+    while(Math.abs(angleDifference(-angles[0], targetAngle)) > fineTolerance && opModeIsActive()){
+        int sign = (int)(angleDifference(-angles[0], targetAngle) / Math.abs(angleDifference(-angles[0], targetAngle)));
+        driveRightMotors(sign * -fineSpeed, sign * -fineSpeed, sign * fineSpeed, sign * fineSpeed);
+        telemetry.addData("Fine", imu.telemetrize());
+        telemetry.update();
+
+        angles = imu.getAngularOrientation();
+    }
+    shutOffMotors();
+}
+
+    public void turnUsingGyroLeftOnly(int turn, double roughSpeed, double fineSpeed, double fineTolerance)
     {
         double roughTolerance = 30;
 
@@ -151,7 +192,7 @@ public class SideAngle extends LinearOpMode
 
         while((Math.abs(angleDifference(-angles[0], targetAngle)) > roughTolerance) && opModeIsActive()){
             int sign = (int)(angleDifference(-angles[0], targetAngle) / Math.abs(angleDifference(-angles[0], targetAngle)));
-            driveRightMotors(sign * -roughSpeed, sign * -roughSpeed, sign * roughSpeed, sign * roughSpeed);
+            driveLeftMotors(sign * -roughSpeed, sign * -roughSpeed, sign * roughSpeed, sign * roughSpeed);
             telemetry.addData("Coarse", imu.telemetrize());
             telemetry.addData("Angle difference", angleDifference(-angles[0], targetAngle));
             telemetry.update();
@@ -161,7 +202,7 @@ public class SideAngle extends LinearOpMode
 
         while(Math.abs(angleDifference(-angles[0], targetAngle)) > fineTolerance && opModeIsActive()){
             int sign = (int)(angleDifference(-angles[0], targetAngle) / Math.abs(angleDifference(-angles[0], targetAngle)));
-            driveRightMotors(sign * -fineSpeed, sign * -fineSpeed, sign * fineSpeed, sign * fineSpeed);
+            driveLeftMotors(sign * -fineSpeed, sign * -fineSpeed, sign * fineSpeed, sign * fineSpeed);
             telemetry.addData("Fine", imu.telemetrize());
             telemetry.update();
 
@@ -248,6 +289,39 @@ public class SideAngle extends LinearOpMode
         shutOffMotors();
     }
 
+    public void turnToAngleLeftOnly(double targetAngle, double roughSpeed, double fineSpeed, double fineTolerance)
+    {
+        double roughTolerance = 30;
+
+        double[] angles = imu.getAngularOrientation();
+
+        //double originalAngle = -angles[0];
+
+        //double targetAngle = originalAngle + turn;
+        //targetAngle = targetAngle % 360;
+        //if (turn<0) {targetAngle = -1*targetAngle;}
+
+        while((Math.abs(angleDifference(-angles[0], targetAngle)) > roughTolerance) && opModeIsActive()){
+            int sign = (int)(angleDifference(-angles[0], targetAngle) / Math.abs(angleDifference(-angles[0], targetAngle)));
+            driveLeftMotors(sign * -roughSpeed, sign * -roughSpeed, sign * roughSpeed, sign * roughSpeed);
+            telemetry.addData("Coarse", imu.telemetrize());
+            telemetry.addData("Angle difference", angleDifference(-angles[0], targetAngle));
+            telemetry.update();
+
+            angles = imu.getAngularOrientation();
+        }
+
+        while(Math.abs(angleDifference(-angles[0], targetAngle)) > fineTolerance && opModeIsActive()){
+            int sign = (int)(angleDifference(-angles[0], targetAngle) / Math.abs(angleDifference(-angles[0], targetAngle)));
+            driveLeftMotors(sign * -fineSpeed, sign * -fineSpeed, sign * fineSpeed, sign * fineSpeed);
+            telemetry.addData("Fine", imu.telemetrize());
+            telemetry.update();
+
+            angles = imu.getAngularOrientation();
+        }
+        shutOffMotors();
+    }
+
     public void runDistanceWEncoders(double feet, double runningPower, boolean shutoffWhenDone)
     {
         double inchesToTravel = feet * 12;
@@ -287,8 +361,6 @@ public class SideAngle extends LinearOpMode
         double jewelArmServoRestPosition = 0.19;
         double jewelArmServoDownPosition = 0.865;
         double gripperHoldingSqueeze = 0.035;
-
-        double cypherSpecificDriveDistance = 2.5; // initialize to make program happy, hope this value never matters
 
         RightFrontDrive = hardwareMap.dcMotor.get("right front drive");
         LeftFrontDrive = hardwareMap.dcMotor.get("left front drive");
@@ -338,36 +410,6 @@ public class SideAngle extends LinearOpMode
             vuMark = RelicRecoveryVuMark.from(relicTemplate);
         }
 
-
-        if(redAlliance)
-        {
-            switch (vuMark) {
-                case CENTER:
-                    cypherSpecificDriveDistance = -1;
-                    break;
-                case LEFT:
-                    cypherSpecificDriveDistance = -1.67;
-                    break;
-                case RIGHT:
-                    cypherSpecificDriveDistance = -1.95;
-                    break;
-            }
-        }
-        else // blue alliance
-        {
-            switch (vuMark) {
-                case CENTER:
-                    cypherSpecificDriveDistance = 1.5;
-                    break;
-                case LEFT:
-                    cypherSpecificDriveDistance = 1.0;
-                    break;
-                case RIGHT:
-                    cypherSpecificDriveDistance = 0.75;
-                    break;
-            }
-        }
-
         JewelArmServo.setPosition(jewelArmServoRestPosition);
 
         LeftGripperServo.setPosition(0.5 + leftGripperHoldingOffsetFromHalf);
@@ -382,9 +424,9 @@ public class SideAngle extends LinearOpMode
         LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         LiftMotor.setPower(1);
 
-        runDistanceWEncoders(0.085, 0.1, true);
+        runDistanceWEncoders(0.15, 0.15, true);
 
-        sleep(200);
+        sleep(50);
 
         JewelArmServo.setPosition(jewelArmServoDownPosition);
         sleep(500);
@@ -393,41 +435,133 @@ public class SideAngle extends LinearOpMode
         {
             if(JewelColorSensor.red() < JewelColorSensor.blue())
             {
-                turnUsingGyroRightOnly(12, 0.25, 0.09, 0.3); // turn right
+                //turnUsingGyroRightOnly(12, 0.25, 0.09, 1); // turn
+                runDistanceWEncoders(0.25,0.2,true);
+                runDistanceWEncoders(-0.25, -0.2, true);
             }
             else
             {
-                turnUsingGyroRightOnly(-12, 0.25, 0.09, 0.3); // turn left
+                //turnUsingGyroRightOnly(-12, 0.25, 0.09, 1); // turn left
+                runDistanceWEncoders(-0.25, -0.2, true);
+                runDistanceWEncoders(0.25, 0.2, true);
             }
 
-            sleep(500);
+            //sleep(500);
             JewelArmServo.setPosition(jewelArmServoRestPosition);
-            turnToAngleRightOnly(0, 0.25, 0.08, 0.2);
-            sleep(200);
+            //turnToAngleRightOnly(0, 0.25, 0.08, 0.2);
+            sleep(50);
 
             runDistanceWEncoders(-1.85, -0.30, true);
-            sleep(200);
+            sleep(50);
             driveMotors(0,0.25,0,0.25);
             sleep(1000);
             shutOffMotors();
-            runDistanceWEncoders(cypherSpecificDriveDistance, -0.35, true);
-            sleep(300);
 
-            switch (vuMark) {
+            runDistanceWEncoders(-1.2, -0.35, true); // this block reverses the robot so it's in the same position as when it goes off facing forward
+            sleep(50);
+            turnToAngle(180, 0.35,18,0.06,0.2);
+            sleep(50);
+            driveMotors(-0.15, -0.15, -0.15, -0.15);
+            sleep(1000);
+            shutOffMotors();
+
+            switch(vuMark)
+            {
                 case LEFT:
-                    turnToAngle(-120, 0.30, 18, 0.06, 0.2);
+                    runDistanceWEncoders(0.25, 0.20, true);
+                    sleep(50);
+                    turnToAngle(-270, 0.30, 18, 0.06, 0.2);
+                    sleep(50);
+                    runDistanceWEncoders(1.15, 0.35, true);
+                    sleep(50);
+                    turnToAngle(-210,0.30,18,0.06,0.2);
+
+                    LiftMotor.setTargetPosition(0);
+                    LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    LiftMotor.setPower(-1);
+
+                    while(opModeIsActive() && LiftMotor.isBusy()) {} // don't continue until the left comes down
+
+                    LeftGripperServo.setPosition(0.75);
+                    RightGripperServo.setPosition(0.25);
+
+                    runDistanceWEncoders(-0.15, -0.2, true);
+
+                    LiftMotor.setTargetPosition(800);
+                    LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    LiftMotor.setPower(1);
+
                     sleep(200);
-                    turnToAngle(-120, 0.30, 18, 0.06, 0.2);
+
+                    LeftGripperServo.setPosition(1);
+                    RightGripperServo.setPosition(0);
+
+                    moveAllMotors(0.25);
+                    sleep(1500);
                     break;
                 case CENTER:
-                    turnToAngle(-120, 0.30, 18, 0.06, 0.2);
-                    sleep(200);
-                    turnToAngle(-120, 0.30, 18, 0.06, 0.2);
+                    turnToAngleRightOnly(-226,0.30,0.08,0.2);
+
+                    sleep(50);
+
+                    runDistanceWEncoders(0.2, 0.20, true);
+
+                    LiftMotor.setTargetPosition(0);
+                    LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    LiftMotor.setPower(-1);
+
+                    while(opModeIsActive() && LiftMotor.isBusy()) {} // don't continue until the left comes down
+
+                    LeftGripperServo.setPosition(0.75);
+                    RightGripperServo.setPosition(0.25);
+
+                    runDistanceWEncoders(-0.1, -0.20, true);
+
+                    LiftMotor.setTargetPosition(800);
+                    LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    LiftMotor.setPower(1);
+
+                    sleep(300);
+
+                    LeftGripperServo.setPosition(1);
+                    RightGripperServo.setPosition(0);
+
+                    accelerateGradually(25, 30);
+                    moveAllMotors(0.3);
+                    sleep(1000);
+                    shutOffMotors();
                     break;
                 case RIGHT:
-                    turnToAngle(-60, 0.30, 18, 0.06, 0.2);
-                    sleep(200);
-                    turnToAngle(-60, 0.30, 18, 0.06, 0.2);
+
+                    turnToAngleRightOnly(-202,0.30,0.08,0.2);
+                    sleep(50);
+
+                    runDistanceWEncoders(0.2, 0.20, true);
+
+                    LiftMotor.setTargetPosition(0);
+                    LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    LiftMotor.setPower(-1);
+
+                    while(opModeIsActive() && LiftMotor.isBusy()) {} // don't continue until the left comes down
+
+                    LeftGripperServo.setPosition(0.75);
+                    RightGripperServo.setPosition(0.25);
+
+                    runDistanceWEncoders(-0.1, -0.20, true);
+
+                    LiftMotor.setTargetPosition(800);
+                    LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    LiftMotor.setPower(1);
+
+                    sleep(300);
+
+                    LeftGripperServo.setPosition(1);
+                    RightGripperServo.setPosition(0);
+
+                    accelerateGradually(25, 30);
+                    moveAllMotors(0.3);
+                    sleep(1000);
+                    shutOffMotors();
                     break;
             }
         }
@@ -435,70 +569,137 @@ public class SideAngle extends LinearOpMode
         {
             if(JewelColorSensor.red() < JewelColorSensor.blue())
             {
-                turnUsingGyroRightOnly(-12, 0.25, 0.09, 0.3); // turn left
+                //turnUsingGyroRightOnly(-12, 0.25, 0.09, 0.3); // turn left
+                runDistanceWEncoders(-0.25, -0.2, true);
+                runDistanceWEncoders(0.25, 0.2, true);
             }
             else
             {
-                turnUsingGyroRightOnly(12, 0.25, 0.09, 0.3); // turn right
+                //turnUsingGyroRightOnly(12, 0.25, 0.09, 0.3); // turn right
+                runDistanceWEncoders(0.25, 0.2, true);
+                runDistanceWEncoders(-0.25, -0.2, true);
             }
 
-            sleep(500);
+            //sleep(500);
             JewelArmServo.setPosition(jewelArmServoRestPosition);
-            turnToAngleRightOnly(0, 0.25, 0.08, 0.2);
+            //turnToAngleRightOnly(0, 0.25, 0.08, 0.2);
             sleep(200);
 
-            runDistanceWEncoders(1.78, 0.30, true);
+            runDistanceWEncoders(1.78, 0.20, true);
             sleep(200);
             driveMotors(-0.15, -0.15, -0.15, -0.15);
             sleep(1000);
             shutOffMotors();
-            runDistanceWEncoders(cypherSpecificDriveDistance, 0.35, true);
+
             sleep(300);
 
-            switch (vuMark)
+            switch(vuMark)
             {
                 case LEFT:
-                    turnToAngle(-120,0.30, 18,0.06, 0.2);
+                    turnToAngleLeftOnly(24,0.30,0.08,0.2);
+
                     sleep(200);
-                    turnToAngle(-120,0.30, 18,0.06, 0.2);
+
+                    runDistanceWEncoders(0.2, 0.15, true);
+
+                    LiftMotor.setTargetPosition(0);
+                    LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    LiftMotor.setPower(-1);
+
+                    while(opModeIsActive() && LiftMotor.isBusy()) {} // don't continue until the left comes down
+
+                    LeftGripperServo.setPosition(0.75);
+                    RightGripperServo.setPosition(0.25);
+
+                    runDistanceWEncoders(-0.1, -0.15, true);
+
+                    LiftMotor.setTargetPosition(800);
+                    LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    LiftMotor.setPower(1);
+
+                    sleep(300);
+
+                    LeftGripperServo.setPosition(1);
+                    RightGripperServo.setPosition(0);
+
+                    sleep(200);
+                    accelerateGradually(25, 30);
+                    moveAllMotors(0.3);
+                    sleep(1000);
+                    shutOffMotors();
                     break;
+
                 case CENTER:
-                    turnToAngle(-120,0.30, 18,0.06, 0.2);
+                    turnToAngleLeftOnly(46,0.30,0.08,0.2);
+
                     sleep(200);
-                    turnToAngle(-120,0.30, 18,0.06, 0.2);
+
+                    runDistanceWEncoders(0.2, 0.15, true);
+
+                    LiftMotor.setTargetPosition(0);
+                    LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    LiftMotor.setPower(-1);
+
+                    while(opModeIsActive() && LiftMotor.isBusy()) {} // don't continue until the left comes down
+
+                    LeftGripperServo.setPosition(0.75);
+                    RightGripperServo.setPosition(0.25);
+
+                    runDistanceWEncoders(-0.1, -0.15, true);
+
+                    LiftMotor.setTargetPosition(800);
+                    LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    LiftMotor.setPower(1);
+
+                    sleep(300);
+
+                    LeftGripperServo.setPosition(1);
+                    RightGripperServo.setPosition(0);
+
+                    sleep(200);
+                    accelerateGradually(25, 30);
+                    moveAllMotors(0.3);
+                    sleep(1000);
+                    shutOffMotors();
                     break;
+
                 case RIGHT:
-                    turnToAngle(-60,0.30, 18,0.06, 0.2);
+                    runDistanceWEncoders(0.25, 0.15, true);
+                    sleep(300);
+                    turnToAngle(90, 0.30, 18, 0.06, 0.2);
                     sleep(200);
-                    turnToAngle(-60,0.30, 18,0.06, 0.2);
-                    break;
+                    runDistanceWEncoders(1.25, 0.30, true);
+                    sleep(300);
+                    turnToAngle(30,0.30,18,0.06,0.2);
+                    sleep(200);
+
+                    LiftMotor.setTargetPosition(0);
+                    LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    LiftMotor.setPower(-1);
+
+                    while(opModeIsActive() && LiftMotor.isBusy()) {} // don't continue until the left comes down
+
+                    LeftGripperServo.setPosition(0.75);
+                    RightGripperServo.setPosition(0.25);
+
+                    moveAllMotors(0.25);
+
+                    LiftMotor.setTargetPosition(800);
+                    LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    LiftMotor.setPower(1);
+
+                    sleep(200);
+
+                    LeftGripperServo.setPosition(1);
+                    RightGripperServo.setPosition(0);
+
+                    sleep(500);
+                    shutOffMotors();
+                    runDistanceWEncoders(-0.15, -0.2, true);
+                    moveAllMotors(0.25);
+                    sleep(700);
             }
         }
-
-        LiftMotor.setTargetPosition(0);
-        LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        LiftMotor.setPower(-1);
-
-        while(opModeIsActive() && LiftMotor.isBusy()) {} // don't continue until the left comes down
-
-        LeftGripperServo.setPosition(0.75);
-        RightGripperServo.setPosition(0.25);
-
-        runDistanceWEncoders(-0.1, -0.15, true);
-
-        LiftMotor.setTargetPosition(800);
-        LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        LiftMotor.setPower(1);
-
-        sleep(300);
-
-        LeftGripperServo.setPosition(1);
-        RightGripperServo.setPosition(0);
-
-        accelerateGradually(25, 30);
-        driveMotors(0.3, 0.3, 0.3, 0.3);
-        sleep(1800);
-        shutOffMotors();
-        runDistanceWEncoders(-0.2, -0.2, true);
+        runDistanceWEncoders(-0.15, -0.2, true);
     }
 }

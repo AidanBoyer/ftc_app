@@ -17,9 +17,9 @@ import com.qualcomm.robotcore.util.Range;
  * Created by agb on 12/7/2017.
  */
 
-@TeleOp(name = "12/31/16 telemetry", group = "TeleOp")
+@TeleOp(name = "1/18/18", group = "TeleOp")
 
-public class newNameForSameThing extends OpMode
+public class teleOpWithLiftDestinations extends OpMode
 {
 
     DcMotor RightFrontDrive;
@@ -76,12 +76,18 @@ public class newNameForSameThing extends OpMode
         JewelColorSensor.enableLed(false);
 
         LiftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        LiftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         imu = new MasqAdafruitIMU("IMU", hardwareMap);
     }
 
     double leftGripperHoldingOffsetFromHalf = 0.030; // smaller number is closed tighter
     double rightGripperHoldingOffsetFromHalf = 0.001; // larger number is closed tighter
     double squeezingDownsizeCoefficient = 200;
+
+    int liftTicksPickup = 0;
+    int liftTicksSecond = 2700;
+    int liftTicksThird = 5150;
+    int liftTicksFourth = 8000;
 
     //double jewelArmServoStartingPosition = 0.07;
     double jewelArmServoRestPosition = 0.19;
@@ -106,16 +112,10 @@ public class newNameForSameThing extends OpMode
     double rightGripperPosition = 0.5 + rightGripperHoldingOffsetFromHalf;
     double leftGripperPosition = 0.5 + leftGripperHoldingOffsetFromHalf;
 
-    int RF = 0;
-    int RR = 0;
-    int LF = 0;
-    int LR = 0;
-
-
     @Override
     public void loop()
     {
-        // GAMEPAD ONE ________________________________________________
+        // GAMEPAD ONE __________________________________________________________________________________________
 
         rightFrontDriveValue = 0;
         rightRearDriveValue = 0;
@@ -206,10 +206,10 @@ public class newNameForSameThing extends OpMode
 
         if(!gamepad1.right_bumper)
         {
-            rightFrontDriveValue = rightFrontDriveValue / 2;
-            rightRearDriveValue = rightRearDriveValue / 2;
-            leftFrontDriveValue = leftFrontDriveValue / 2;
-            leftRearDriveValue = leftRearDriveValue / 2;
+            rightFrontDriveValue = rightFrontDriveValue / 3;
+            rightRearDriveValue = rightRearDriveValue / 3;
+            leftFrontDriveValue = leftFrontDriveValue / 3;
+            leftRearDriveValue = leftRearDriveValue / 3;
         }
 
         if(gamepad1.left_bumper)
@@ -239,7 +239,7 @@ public class newNameForSameThing extends OpMode
             rightFrontDriveValue = LF * -1;
         }
 
-        // GAMEPAD TWO _____________________________________________________
+        // GAMEPAD TWO _________________________________________________________________________________________
 
         if(gamepad2.guide)
         {
@@ -257,12 +257,21 @@ public class newNameForSameThing extends OpMode
             rightGripperPosition = (((((gamepad2.right_stick_x * gamepad2.right_stick_x * Math.signum(gamepad2.right_stick_x)) * -1) + 1) / 2) + rightGripperHoldingOffsetFromHalf);
             leftGripperPosition = (((((gamepad2.left_stick_x * gamepad2.left_stick_x * Math.signum(gamepad2.left_stick_x)) * -1) + 1) / 2) + leftGripperHoldingOffsetFromHalf);
 
+            if(LiftMotor.getMode() == DcMotor.RunMode.RUN_TO_POSITION && ((gamepad2.right_trigger != 0) || (gamepad2.left_trigger != 0)))
+            {
+                LiftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            }
+
             liftMotorValue = ((gamepad2.right_trigger * gamepad2.right_trigger) - (gamepad2.left_trigger * gamepad2.left_trigger));
         }
         else
         {
-            if(gamepad2.right_stick_y < 0){liftMotorValue = gamepad2.right_stick_y * gamepad2.right_stick_y;}
-            else{liftMotorValue = gamepad2.right_stick_y * gamepad2.right_stick_y * -1;}
+            if(LiftMotor.getMode() == DcMotor.RunMode.RUN_TO_POSITION && (gamepad2.right_stick_y != 0))
+            {
+                LiftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            }
+
+            liftMotorValue = gamepad2.right_stick_y * gamepad2.right_stick_y * -Math.signum(gamepad2.right_stick_y);
 
             leftGripperPosition = leftGripperPosition - (gamepad2.right_trigger / squeezingDownsizeCoefficient) + (gamepad2.left_trigger / squeezingDownsizeCoefficient);
             rightGripperPosition = rightGripperPosition + (gamepad2.right_trigger / squeezingDownsizeCoefficient) - (gamepad2.left_trigger / squeezingDownsizeCoefficient);
@@ -274,9 +283,48 @@ public class newNameForSameThing extends OpMode
             leftGripperPosition = 0.5 + leftGripperHoldingOffsetFromHalf;
         }
 
+        if(gamepad2.a)
+        {
+            LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            LiftMotor.setTargetPosition(liftTicksPickup);
+            if (LiftMotor.getCurrentPosition() > liftTicksPickup) {
+                LiftMotor.setPower(-1);
+            } else {
+                LiftMotor.setPower(1);
+            }
+        }
+        if(gamepad2.x)
+        {
+            LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            LiftMotor.setTargetPosition(liftTicksSecond);
+            if (LiftMotor.getCurrentPosition() > liftTicksSecond) {
+                LiftMotor.setPower(-1);
+            } else {
+                LiftMotor.setPower(1);
+            }
+        }
+        if(gamepad2.y)
+        {
+            LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            LiftMotor.setTargetPosition(liftTicksThird);
+            if (LiftMotor.getCurrentPosition() > liftTicksThird) {
+                LiftMotor.setPower(-1);
+            } else {
+                LiftMotor.setPower(1);
+            }
+        }
+        if(gamepad2.b)
+        {
+            LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            LiftMotor.setTargetPosition(liftTicksFourth);
+            if (LiftMotor.getCurrentPosition() > liftTicksFourth) {
+                LiftMotor.setPower(-1);
+            } else {
+                LiftMotor.setPower(1);
+            }
+        }
 
-
-        // ______________________________________________
+        // _______________________________________________________________________________________
 
         if(armSafetyStop.isPressed() && (Math.signum(liftMotorValue) == 1))
         {
@@ -288,21 +336,12 @@ public class newNameForSameThing extends OpMode
         LeftFrontDrive.setPower(leftFrontDriveValue);
         LeftRearDrive.setPower(leftRearDriveValue);
 
-        LiftMotor.setPower(liftMotorValue);
+        if(LiftMotor.getMode() == DcMotor.RunMode.RUN_USING_ENCODER)
+        {
+            LiftMotor.setPower(liftMotorValue);
+        }
 
         RightGripperServo.setPosition(rightGripperPosition);
         LeftGripperServo.setPosition(leftGripperPosition);
-
-        if(gamepad1.back)
-        {
-            RF = RightFrontDrive.getCurrentPosition();
-            LR = LeftRearDrive.getCurrentPosition();
-            RR = RightRearDrive.getCurrentPosition();
-            LF = LeftFrontDrive.getCurrentPosition();
-        }
-
-        telemetry.addData("IMU: ", imu.telemetrize());
-        telemetry.addData("Encoder average: ", (((RightFrontDrive.getCurrentPosition() - RF) + (LeftFrontDrive.getCurrentPosition() - LF) + (RightRearDrive.getCurrentPosition() - RR) + (LeftRearDrive.getCurrentPosition() - LR)) / 4));
-        telemetry.update();
     }
 }
