@@ -376,11 +376,13 @@ public class SideAngle extends LinearOpMode
         LeftGripperServo.setPosition(0.5 + leftGripperHoldingOffsetFromHalf - gripperHoldingSqueeze);
         RightGripperServo.setPosition(0.5 + rightGripperHoldingOffsetFromHalf + gripperHoldingSqueeze);
 
-        sleep(200);
+        sleep(300);
 
-        LiftMotor.setTargetPosition(8000);
+        LiftMotor.setTargetPosition(10000);
         LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         LiftMotor.setPower(1);
+
+        sleep(50);
 
         runDistanceWEncoders(0.085, 0.1, true);
 
@@ -393,25 +395,29 @@ public class SideAngle extends LinearOpMode
         {
             if(JewelColorSensor.red() < JewelColorSensor.blue())
             {
-                turnUsingGyroRightOnly(12, 0.25, 0.09, 0.3); // turn right
+                //turnUsingGyroRightOnly(12, 0.25, 0.09, 0.3); // turn right
+                runDistanceWEncoders(0.25,0.2,true);
+                runDistanceWEncoders(-0.25, -0.2, true);
             }
             else
             {
-                turnUsingGyroRightOnly(-12, 0.25, 0.09, 0.3); // turn left
+                //turnUsingGyroRightOnly(-12, 0.25, 0.09, 0.3); // turn left
+                runDistanceWEncoders(-0.25,-0.2,true);
+                runDistanceWEncoders(0.25, 0.2, true);
             }
 
-            sleep(500);
+            sleep(50);
             JewelArmServo.setPosition(jewelArmServoRestPosition);
-            turnToAngleRightOnly(0, 0.25, 0.08, 0.2);
-            sleep(200);
+            //turnToAngleRightOnly(0, 0.25, 0.08, 0.2);
+            sleep(50);
 
             runDistanceWEncoders(-1.85, -0.30, true);
-            sleep(200);
+            sleep(50);
             driveMotors(0,0.25,0,0.25);
             sleep(1000);
             shutOffMotors();
             runDistanceWEncoders(cypherSpecificDriveDistance, -0.35, true);
-            sleep(300);
+            sleep(50);
 
             switch (vuMark) {
                 case LEFT:
@@ -435,41 +441,45 @@ public class SideAngle extends LinearOpMode
         {
             if(JewelColorSensor.red() < JewelColorSensor.blue())
             {
-                turnUsingGyroRightOnly(-12, 0.25, 0.09, 0.3); // turn left
+                //turnUsingGyroRightOnly(-12, 0.25, 0.09, 0.3); // turn left
+                runDistanceWEncoders(-0.25,-0.2,true);
+                runDistanceWEncoders(0.25, 0.2, true);
             }
             else
             {
-                turnUsingGyroRightOnly(12, 0.25, 0.09, 0.3); // turn right
+                //turnUsingGyroRightOnly(12, 0.25, 0.09, 0.3); // turn right
+                runDistanceWEncoders(0.25,0.2,true);
+                runDistanceWEncoders(-0.25, -0.2, true);
             }
 
-            sleep(500);
+            sleep(50);
             JewelArmServo.setPosition(jewelArmServoRestPosition);
-            turnToAngleRightOnly(0, 0.25, 0.08, 0.2);
-            sleep(200);
+            //turnToAngleRightOnly(0, 0.25, 0.08, 0.2);
+            sleep(50);
 
             runDistanceWEncoders(1.78, 0.30, true);
-            sleep(200);
+            sleep(50);
             driveMotors(-0.15, -0.15, -0.15, -0.15);
             sleep(1000);
             shutOffMotors();
             runDistanceWEncoders(cypherSpecificDriveDistance, 0.35, true);
-            sleep(300);
+            sleep(50);
 
             switch (vuMark)
             {
                 case LEFT:
                     turnToAngle(-120,0.30, 18,0.06, 0.2);
-                    sleep(200);
+                    sleep(50);
                     turnToAngle(-120,0.30, 18,0.06, 0.2);
                     break;
                 case CENTER:
                     turnToAngle(-120,0.30, 18,0.06, 0.2);
-                    sleep(200);
+                    sleep(50);
                     turnToAngle(-120,0.30, 18,0.06, 0.2);
                     break;
                 case RIGHT:
                     turnToAngle(-60,0.30, 18,0.06, 0.2);
-                    sleep(200);
+                    sleep(50);
                     turnToAngle(-60,0.30, 18,0.06, 0.2);
                     break;
             }

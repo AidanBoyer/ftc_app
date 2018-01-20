@@ -418,11 +418,13 @@ public class blueEndAngle extends LinearOpMode
         LeftGripperServo.setPosition(0.5 + leftGripperHoldingOffsetFromHalf - gripperHoldingSqueeze);
         RightGripperServo.setPosition(0.5 + rightGripperHoldingOffsetFromHalf + gripperHoldingSqueeze);
 
-        sleep(200);
+        sleep(300);
 
-        LiftMotor.setTargetPosition(8000);
+        LiftMotor.setTargetPosition(10000);
         LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         LiftMotor.setPower(1);
+
+        sleep(50);
 
         runDistanceWEncoders(0.15, 0.15, true);
 

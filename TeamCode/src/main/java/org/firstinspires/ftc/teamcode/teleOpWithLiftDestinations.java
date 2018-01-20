@@ -83,11 +83,13 @@ public class teleOpWithLiftDestinations extends OpMode
     double leftGripperHoldingOffsetFromHalf = 0.030; // smaller number is closed tighter
     double rightGripperHoldingOffsetFromHalf = 0.001; // larger number is closed tighter
     double squeezingDownsizeCoefficient = 200;
+    double gripperHoldingSqueeze = 0.035;
+    double dPadTurnSpeed = 0.60;
 
     int liftTicksPickup = 0;
-    int liftTicksSecond = 2700;
-    int liftTicksThird = 5150;
-    int liftTicksFourth = 8000;
+    int liftTicksSecond = 3000;
+    int liftTicksThird = 5700;
+    int liftTicksFourth = 9100;
 
     //double jewelArmServoStartingPosition = 0.07;
     double jewelArmServoRestPosition = 0.19;
@@ -204,7 +206,22 @@ public class teleOpWithLiftDestinations extends OpMode
             leftRearDriveValue = -gamepad1.left_trigger;
         }
 
-        if(!gamepad1.right_bumper)
+        if(gamepad1.dpad_left)
+        {
+            rightFrontDriveValue = dPadTurnSpeed;
+            rightRearDriveValue = dPadTurnSpeed;
+            leftRearDriveValue = -dPadTurnSpeed;
+            leftFrontDriveValue = -dPadTurnSpeed;
+        }
+        if(gamepad1.dpad_right)
+        {
+            rightFrontDriveValue = -dPadTurnSpeed;
+            rightRearDriveValue = -dPadTurnSpeed;
+            leftRearDriveValue = dPadTurnSpeed;
+            leftFrontDriveValue = dPadTurnSpeed;
+        }
+
+        if(!gamepad1.left_bumper)
         {
             rightFrontDriveValue = rightFrontDriveValue / 3;
             rightRearDriveValue = rightRearDriveValue / 3;
@@ -212,7 +229,7 @@ public class teleOpWithLiftDestinations extends OpMode
             leftRearDriveValue = leftRearDriveValue / 3;
         }
 
-        if(gamepad1.left_bumper)
+        if(gamepad1.right_bumper)
         {
             if(!wasReverseButton)
             {
@@ -281,6 +298,12 @@ public class teleOpWithLiftDestinations extends OpMode
         {
             rightGripperPosition = 0.5 + rightGripperHoldingOffsetFromHalf;
             leftGripperPosition = 0.5 + leftGripperHoldingOffsetFromHalf;
+        }
+
+        if(gamepad2.start)
+        {
+            leftGripperPosition = (0.5 + leftGripperHoldingOffsetFromHalf - gripperHoldingSqueeze);
+            rightGripperPosition = (0.5 + rightGripperHoldingOffsetFromHalf + gripperHoldingSqueeze);
         }
 
         if(gamepad2.a)
