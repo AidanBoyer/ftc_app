@@ -39,26 +39,26 @@ public class ServoPositionFinder extends OpMode
     @Override
     public void loop()
     {
-        //if(gamepad1.right_bumper) {isRight = true;}
-        //else if(gamepad1.left_bumper) {isRight = false;}
+        if(gamepad1.right_bumper) {isRight = true;}
+        else if(gamepad1.left_bumper) {isRight = false;}
 
-        //if(isRight)
-        //{
-            //rightServoPosition = rightServoPosition + (gamepad1.right_trigger / downsizingCoefficient) - (gamepad1.left_trigger / downsizingCoefficient);
-        //}
-        //else
-        //{
-        //    leftServoPosition = leftServoPosition + (gamepad1.right_trigger / downsizingCoefficient) - (gamepad1.left_trigger / downsizingCoefficient);
-        //}
+        if(isRight)
+        {
+            rightServoPosition = rightServoPosition + (gamepad1.right_trigger / downsizingCoefficient) - (gamepad1.left_trigger / downsizingCoefficient);
+        }
+        else
+        {
+            leftServoPosition = leftServoPosition + (gamepad1.right_trigger / downsizingCoefficient) - (gamepad1.left_trigger / downsizingCoefficient);
+        }
 
         LeftGripperServo.setPosition(leftServoPosition);
         RightGripperServo.setPosition(rightServoPosition);
 
-        jewelArmServoPosition = jewelArmServoPosition + (gamepad1.right_trigger / downsizingCoefficient) - (gamepad1.left_trigger / downsizingCoefficient);
-        JewelArmServo.setPosition(jewelArmServoPosition);
-        //telemetry.addData("Left", LeftGripperServo.getPosition());
-        //telemetry.addData("Right", RightGripperServo.getPosition());
-        telemetry.addData("Arm", JewelArmServo.getPosition());
+        //jewelArmServoPosition = jewelArmServoPosition + (gamepad1.right_trigger / downsizingCoefficient) - (gamepad1.left_trigger / downsizingCoefficient);
+        //JewelArmServo.setPosition(jewelArmServoPosition);
+        telemetry.addData("Left", LeftGripperServo.getPosition());
+        telemetry.addData("Right", RightGripperServo.getPosition());
+        //telemetry.addData("Arm", JewelArmServo.getPosition());
         telemetry.update();
     }
 }

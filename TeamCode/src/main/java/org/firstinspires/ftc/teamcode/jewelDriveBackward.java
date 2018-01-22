@@ -28,9 +28,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
  * Created by agb on 1/18/2018.
  */
 
-@Autonomous(name = "Side, 30°", group = "Autonomous")
+@Autonomous(name = "JewelOnly, back", group = "Autonomous")
 
-public class SideAngle extends LinearOpMode
+public class jewelDriveBackward extends LinearOpMode
 {
     TouchSensor teamSelector;
     DcMotor RightFrontDrive;
@@ -329,45 +329,6 @@ public class SideAngle extends LinearOpMode
 
         waitForStart(); // _________________________________________________________________________
 
-        relicTrackables.activate();
-
-        RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
-
-        while(vuMark == RelicRecoveryVuMark.UNKNOWN)
-        {
-            vuMark = RelicRecoveryVuMark.from(relicTemplate);
-        }
-
-
-        if(redAlliance)
-        {
-            switch (vuMark) {
-                case CENTER:
-                    cypherSpecificDriveDistance = -1;
-                    break;
-                case LEFT:
-                    cypherSpecificDriveDistance = -1.67;
-                    break;
-                case RIGHT:
-                    cypherSpecificDriveDistance = -1.95;
-                    break;
-            }
-        }
-        else // blue alliance
-        {
-            switch (vuMark) {
-                case CENTER:
-                    cypherSpecificDriveDistance = 1.5;
-                    break;
-                case LEFT:
-                    cypherSpecificDriveDistance = 1.0;
-                    break;
-                case RIGHT:
-                    cypherSpecificDriveDistance = 0.75;
-                    break;
-            }
-        }
-
         JewelArmServo.setPosition(jewelArmServoRestPosition);
 
         LeftGripperServo.setPosition(0.5 + leftGripperHoldingOffsetFromHalf);
@@ -378,7 +339,7 @@ public class SideAngle extends LinearOpMode
 
         sleep(300);
 
-        LiftMotor.setTargetPosition(10000);
+        LiftMotor.setTargetPosition(5000);
         LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         LiftMotor.setPower(1);
 
@@ -411,31 +372,7 @@ public class SideAngle extends LinearOpMode
             //turnToAngleRightOnly(0, 0.25, 0.08, 0.2);
             sleep(200);
 
-            runDistanceWEncoders(-1.85, -0.30, true);
-            sleep(200);
-            driveMotors(0,0.25,0,0.25);
-            sleep(1000);
-            shutOffMotors();
-            runDistanceWEncoders(cypherSpecificDriveDistance, -0.35, true);
-            sleep(200);
 
-            switch (vuMark) {
-                case LEFT:
-                    turnToAngle(-120, 0.30, 18, 0.06, 0.2);
-                    sleep(200);
-                    turnToAngle(-120, 0.30, 18, 0.06, 0.2);
-                    break;
-                case CENTER:
-                    turnToAngle(-120, 0.30, 18, 0.06, 0.2);
-                    sleep(200);
-                    turnToAngle(-120, 0.30, 18, 0.06, 0.2);
-                    break;
-                case RIGHT:
-                    turnToAngle(-60, 0.30, 18, 0.06, 0.2);
-                    sleep(200);
-                    turnToAngle(-60, 0.30, 18, 0.06, 0.2);
-                    break;
-            }
         }
         else // if blue alliance
         {
@@ -456,59 +393,14 @@ public class SideAngle extends LinearOpMode
             JewelArmServo.setPosition(jewelArmServoRestPosition);
             //turnToAngleRightOnly(0, 0.25, 0.08, 0.2);
             sleep(50);
-
-            runDistanceWEncoders(1.78, 0.30, true);
-            sleep(200);
-            driveMotors(-0.15, -0.15, -0.15, -0.15);
-            sleep(1000);
-            shutOffMotors();
-            runDistanceWEncoders(cypherSpecificDriveDistance, 0.35, true);
-            sleep(200);
-
-            switch (vuMark)
-            {
-                case LEFT:
-                    turnToAngle(-120,0.30, 18,0.06, 0.2);
-                    sleep(200);
-                    turnToAngle(-120,0.30, 18,0.06, 0.2);
-                    break;
-                case CENTER:
-                    turnToAngle(-120,0.30, 18,0.06, 0.2);
-                    sleep(200);
-                    turnToAngle(-120,0.30, 18,0.06, 0.2);
-                    break;
-                case RIGHT:
-                    turnToAngle(-60,0.30, 18,0.06, 0.2);
-                    sleep(200);
-                    turnToAngle(-60,0.30, 18,0.06, 0.2);
-                    break;
-            }
         }
+
+        runDistanceWEncoders(-2.0, -0.20, true);
 
         LiftMotor.setTargetPosition(0);
         LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         LiftMotor.setPower(-1);
 
         while(opModeIsActive() && LiftMotor.isBusy()) {} // don't continue until the left comes down
-
-        LeftGripperServo.setPosition(0.75);
-        RightGripperServo.setPosition(0.25);
-
-        runDistanceWEncoders(-0.1, -0.15, true);
-
-        LiftMotor.setTargetPosition(800);
-        LiftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        LiftMotor.setPower(1);
-
-        sleep(300);
-
-        LeftGripperServo.setPosition(1);
-        RightGripperServo.setPosition(0);
-
-        accelerateGradually(25, 30);
-        driveMotors(0.3, 0.3, 0.3, 0.3);
-        sleep(1800);
-        shutOffMotors();
-        runDistanceWEncoders(-0.2, -0.2, true);
     }
 }

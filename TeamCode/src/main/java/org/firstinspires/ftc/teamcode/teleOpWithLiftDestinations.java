@@ -80,8 +80,8 @@ public class teleOpWithLiftDestinations extends OpMode
         imu = new MasqAdafruitIMU("IMU", hardwareMap);
     }
 
-    double leftGripperHoldingOffsetFromHalf = 0.030; // smaller number is closed tighter
-    double rightGripperHoldingOffsetFromHalf = 0.001; // larger number is closed tighter
+    double leftGripperHoldingOffsetFromHalf = 0.0142; // smaller number is closed tighter
+    double rightGripperHoldingOffsetFromHalf = 0.0152; // larger number is closed tighter
     double squeezingDownsizeCoefficient = 200;
     double gripperHoldingSqueeze = 0.035;
     double dPadTurnSpeed = 0.60;
@@ -223,10 +223,10 @@ public class teleOpWithLiftDestinations extends OpMode
 
         if(!gamepad1.left_bumper)
         {
-            rightFrontDriveValue = rightFrontDriveValue / 3;
-            rightRearDriveValue = rightRearDriveValue / 3;
-            leftFrontDriveValue = leftFrontDriveValue / 3;
-            leftRearDriveValue = leftRearDriveValue / 3;
+            rightFrontDriveValue = rightFrontDriveValue / 4;
+            rightRearDriveValue = rightRearDriveValue / 4;
+            leftFrontDriveValue = leftFrontDriveValue / 4;
+            leftRearDriveValue = leftRearDriveValue / 4;
         }
 
         if(gamepad1.right_bumper)

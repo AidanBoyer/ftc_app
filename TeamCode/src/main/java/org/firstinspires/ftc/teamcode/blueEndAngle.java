@@ -453,7 +453,7 @@ public class blueEndAngle extends LinearOpMode
             //turnToAngleRightOnly(0, 0.25, 0.08, 0.2);
             sleep(50);
 
-            runDistanceWEncoders(-1.85, -0.30, true);
+            runDistanceWEncoders(-1.85, -0.15, true);
             sleep(50);
             driveMotors(0,0.25,0,0.25);
             sleep(1000);
@@ -587,7 +587,7 @@ public class blueEndAngle extends LinearOpMode
             //turnToAngleRightOnly(0, 0.25, 0.08, 0.2);
             sleep(200);
 
-            runDistanceWEncoders(1.78, 0.20, true);
+            runDistanceWEncoders(1.78, 0.15, true);
             sleep(200);
             driveMotors(-0.15, -0.15, -0.15, -0.15);
             sleep(1000);
